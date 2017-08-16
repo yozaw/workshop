@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+  <title>避難場所マップ</title>
+
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.4/esri/css/main.css">
+  <script src="https://js.arcgis.com/4.4/"></script>
+
+  <script>
+    require([
+      "esri/WebMap",
+      "esri/views/MapView",
+      "esri/tasks/ClosestFacilityTask",
+      "esri/tasks/support/ClosestFacilityParameters",
+      "esri/symbols/PictureMarkerSymbol",
+      "esri/symbols/SimpleMarkerSymbol",
+      "esri/symbols/SimpleLineSymbol",
+      "esri/symbols/SimpleFillSymbol",
+      "esri/Graphic",
+      "esri/tasks/support/FeatureSet",
+      "esri/geometry/geometryEngine",
+      "dojo/dom-style",
+      "dojo/dom",
+      "dojo/on"
+    ], function(WebMap, MapView, ClosestFacilityTask, ClosestFacilityParameters, PictureMarkerSymbol, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Graphic, FeatureSet, geometryEngine, domStyle, dom, on) {
+      // Web マップの作成
+      var webmap = new WebMap({
+        portalItem: {
+          id: "285f619f75e64d3681ba101b006d2f65"
+        }
+      });
+
+      // レイヤーの取得
+      var shelterLayer;
+      webmap.then(function(){
+        shelterLayer = webmap.layers.find(function(layer){
+          return layer.title === "室蘭市 - 避難場所";
+        });
+      });
+
+      // View の作成
+      var view = new MapView({
+        map: webmap,
+        container: "viewDiv"
+      });
+
+      // View のクリックイベントハンドラ
+      view.on("click", runClosestFacilityTask);
+
+      // 最寄り施設解析の設定
+      var closestFacilityTask = new ClosestFacilityTask({
+        url: "https://route.arcgis.com/arcgis/rest/services/World/ClosestFacility/NAServer/ClosestFacility_World"
+      });
+
+      var params = new ClosestFacilityParameters({
+        returnRoutes: true
+      });
+
+      // シンボルの作成
+      var incidentPointSymbol = new PictureMarkerSymbol({
+        url: "https://static.arcgis.com/images/Symbols/Basic/RedStickpin.png",
+        height: "30px",
+        width: "30px",
+        yoffset: "15px"
+      });
+
+      var bufferPolygonSymbol = new SimpleFillSymbol({
+        color: [232, 104, 80, 0.25],
+        style: "solid",
+        outline: {
+          color: [232, 104, 80],
+          width: 2
+        }
+      });
+
+      var routePolylineSymbol = new SimpleLineSymbol({
+        color: [89, 95, 35],
+        width: 4,
+        style: "solid"
+      });
+
+      // View をクリックした地点から最寄りの避難場所を検索
+      function runClosestFacilityTask(evt){
+        view.graphics.removeAll();
+
+        // クリック地点を解析のパラメーターに設定
+        var location = new Graphic({
+          geometry: evt.mapPoint,
+          symbol: incidentPointSymbol
+        });
+        view.graphics.add(location);
+
+        var features = [];
+        features.push(location);
+        var incidents = new FeatureSet({
+          features: features
+        });
+        params.incidents = incidents;
+
+        // クリック地点から 1km のバッファーを作成
+        var buffer = geometryEngine.buffer(evt.mapPoint, 1, "kilometers");
+        var area = new Graphic({
+          geometry: buffer,
+          symbol: bufferPolygonSymbol
+        });
+        view.graphics.add(area);
+
+        // バッファー内にある避難場所をクエリ
+        var queryParams = shelterLayer.createQuery();
+        queryParams.geometry = buffer;
+        shelterLayer.queryFeatures(queryParams).then(function(result){
+          // クエリ結果を解析対象として設定
+          params.facilities = result;
+        }).then(function(){
+          // 解析の実行
+          closestFacilityTask.solve(params).then(function(solveResult){
+            // 結果を表示
+            var routes = solveResult.routes.map(function(route){
+              route.symbol = routePolylineSymbol;
+              return route;
+            });
+            view.graphics.addMany(routes);
+          });
+        });
+      }
+    });
+  </script>
+</head>
+
+<body>      
+  <div id="viewDiv"></div>
+</body>
+</html>
