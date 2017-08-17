@@ -95,7 +95,7 @@
         // クリック地点をマップに表示
         var point = evt.mapPoint;
         var location = new Graphic({
-          geometry: evt.mapPoint,
+          geometry: point,
           symbol: incidentPointSymbol
         });
         view.graphics.add(location);
@@ -109,7 +109,7 @@
         params.incidents = incidents;
 
         // クリック地点から 1km のバッファーを作成
-        var buffer = geometryEngine.buffer(evt.mapPoint, 1, "kilometers");
+        var buffer = geometryEngine.buffer(point, 1, "kilometers");
         var area = new Graphic({
           geometry: buffer,
           symbol: bufferPolygonSymbol
@@ -119,6 +119,7 @@
         // バッファー内にある避難場所をクエリ
         var queryParams = shelterLayer.createQuery();
         queryParams.geometry = buffer;
+        // クエリの実行
         shelterLayer.queryFeatures(queryParams).then(function(result){
           // クエリ結果を解析対象として設定
           params.facilities = result;

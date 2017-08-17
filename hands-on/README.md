@@ -1,9 +1,9 @@
-# ArcGIS API for JavaScript を使用した Web アプリ開発手順書
+# Web マップを活用した Web アプリ開発手順書
 
 ## Web アプリ
 
 この手順書では、避難場所を可視化した Web マップを ArcGIS API for JavaScript を使用したアプリで読み込みます。  
-さらに、ArcGIS Online の最寄り施設解析サービスを利用して、マップをクリックした地点から最寄りの避難場所を解析する機能を実装します。
+さらに、ArcGIS Online が公開している最寄り施設の検出解析サービスを利用して、マップをクリックした地点から最寄りの避難場所へのルートを表示する機能を実装します。
 
 ## 1. Web マップの作成
 
@@ -61,6 +61,7 @@ Web マップに避難場所データがレイヤーとして追加されまし�
 
 * レイヤー
   * レイヤーの名前を「室蘭市 - 避難場所」に変更します。
+  * ポップアップのタイトルを「避難場所」に変更します。
   * ポップアップに以下の属性フィールドを表示するよう構成します。
     * 施設名称
     * 住所
@@ -73,7 +74,7 @@ Web マップに避難場所データがレイヤーとして追加されまし�
     * 構造
     * 収容人数
 * ベースマップ
-  * [道路地図] に設定します。
+  * [道路地図] に変更します。
 
 #### マップの保存
 
@@ -90,10 +91,362 @@ Web マップを保存すると Web マップ ID とよばれる一意の ID が
 
 GitHub に公開している[ハンズオンのリポジトリ]()からサンプルをダウンロードします。
 
-<span style="font-size:30px;">[https://github.com/EsriJapan/hogehoge/](https://github.com/EsriJapan/hogehoge/)</span>
-
 hands-on/index.html をテキストエディターで開きます。  
-コメントに沿って以下の機能を実装していきます。
-* Web マップの読み込み・表示
-* Web マップに含まれる避難場所レイヤーの取得
-* 最寄りの避難場所の検索
+
+### 1. ArcGIS API for JavaScript の読み込み
+
+ArcGIS API for JavaScript を読み込みます。
+
+```html
+<link rel="stylesheet" href="https://js.arcgis.com/4.4/esri/css/main.css">
+<script src="https://js.arcgis.com/4.4/"></script>
+```
+
+### 2. Web マップ の読み込み・表示
+
+script タグを追加し、Web マップの読み込み、表示に必要なモジュールを読み込みます。  
+[WebMap クラス](https://developers.arcgis.com/javascript/latest/api-reference/esri-WebMap.html)を使用して、Web マップを読み込みます。読み込んだ Web マップを [MapView](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-MapView.html)に表示します。
+
+```html
+<script>
+  require([
+    "esri/WebMap",
+    "esri/views/MapView",
+    "dojo/domReady!"
+  ], function(WebMap, MapView) {
+
+    var webmap = new WebMap({
+      // Web マップの読み込み
+    });
+
+    var view = new MapView({
+      map: webmap,
+      container: "viewDiv"
+    });
+  });
+</script>
+```
+
+<span style="color:orange;">タスク</span>  
+[Web マップクラスのドキュメント](https://developers.arcgis.com/javascript/latest/api-reference/esri-WebMap.html)を参考に、作成した Web マップを読み込んでみましょう。  
+Web マップを読み込んだら、アプリを開いて、作成した Web マップがアプリで表示されているか確認します。
+
+<span style="color:orange;">回答</span>
+
+```js
+var webmap = new WebMap({
+  portalItem: {
+    id: "Web マップ ID"
+  }
+});
+```
+
+### 3. 最寄りの避難場所を検索
+
+クリックした地点から最寄りの避難場所を検索し、避難場所までの経路をマップに表示します。
+
+まず、マップをクリックしたら検索を実行するよう、クリックイベントハンドラと、実行される関数を設定します。
+
+```js
+view.on("click", runClosestFacilityTask);
+
+function runClosestFacilityTask(evt){
+  // 検索を実行
+}
+```
+
+イベントハンドラの戻り値をもとに、クリックした地点をマップに描画します。  
+クリック地点を取得したら、一時的にマップ上にフィーチャを表す際に使用される[グラフィック](https://developers.arcgis.com/javascript/latest/api-reference/esri-Graphic.html)を作成し、マップに追加します。  
+グラフィックには、位置を定義する geometry と、スタイルを定義する symbol を設定します。
+
+```js
+require([
+  // モジュールの読み込み
+  "esri/Graphic",
+], function(Graphic){
+
+  function runClosestFacilityTask(evt){
+    // クリック地点を取得
+    var point = evt.mapPoint;
+
+    // グラフィックを作成
+    var location = new Graphic({
+      geometry: point,
+      symbol: incidentPointSymbol
+    });
+
+    // マップに描画
+    view.graphics.add(location);
+  }
+
+});
+```
+
+<span style="color:orange;">タスク</span>  
+作成したグラフィックは symbol プロパティで incidentPointSymbol を参照しています。  
+クリック地点を表すシンボルを作成し、incidentPointSymbol に代入しましょう。
+
+ヒント：API には、ジオメトリのタイプごとに以下のシンボル クラスを提供しています。
+* ポイント
+  * [マーカーシンボル](https://developers.arcgis.com/javascript/latest/api-reference/esri-symbols-SimpleMarkerSymbol.html)
+* ライン
+  * [ライン シンボル](https://developers.arcgis.com/javascript/latest/api-reference/esri-symbols-SimpleLineSymbol.html)
+* ポリゴン
+  * [塗りつぶしシンボル](https://developers.arcgis.com/javascript/latest/api-reference/esri-symbols-SimpleFillSymbol.html)
+
+クリック地点を表すシンボルを作成したら、次の2つのシンボルを作成します。
+* バッファーシンボル
+  * クリック地点から 1km のバッファー（ポリゴン）を表すシンボル
+  * bufferPolygonSymbol 変数に代入
+* ルートシンボル
+  * 最寄りの避難場所へのルート（ライン）を表すシンボル
+  * routePolylineSymbol 変数に代入
+
+<span style="color:orange;">例</span>
+
+```js
+require([
+  // モジュールの読み込み
+  "esri/symbols/SimpleMarkerSymbol",
+  "esri/symbols/SimpleFillSymbol",
+  "esri/symbols/SimpleLineSymbol"
+], function(SimpleMarkerSymbol, SimpleFillSymbol, SimpleLineSymbol){
+
+  // クリック地点のシンボル
+  var incidentPointSymbol = new SimpleMarkerSymbol({
+    style: "circle",
+    color: [255, 0, 0],
+    size: 8
+  });
+
+  // バッファーシンボル
+  var bufferPolygonSymbol = new SimpleFillSymbol({
+    color: [255, 183, 51, 0.25],
+    style: "solid",
+    outline: {
+      color: [255, 183, 51],
+      width: 2
+    }
+  });
+
+  // ルートシンボル
+  var routePolylineSymbol = new SimpleLineSymbol({
+    color: [89, 95, 35],
+    width: 4,
+    style: "solid"
+  });
+
+});
+```
+
+最寄りの避難場所を検索します。  
+避難場所の検索には、[最寄り施設の検出解析](https://desktop.arcgis.com/ja/arcmap/latest/extensions/network-analyst/closest-facility.htm)を使用します。最寄り施設の検出解析は、入力した地点（incidents）に最も近い施設（facilities）を検索して、地点までの最適なルートを出力します。    
+API には、[ClosestFacilityTask](https://developers.arcgis.com/javascript/latest/api-reference/esri-tasks-ClosestFacilityTask.html) が用意されており、簡単に最寄り施設の検出解析を利用できます。
+
+まず、ClosestFacilityTask に解析で使用するサービスを設定します。今回は、[ArcGIS Online が公開しているサービス](https://developers.arcgis.com/features/directions/)を使用します。  
+ArcGIS Online には、最寄り施設の検出解析のほかにも、[さまざまな解析サービス](http://www.arcgis.com/features/features-analytics.html)がホストされており、独自のサービスを公開することなく、簡単に解析機能を利用できます。  
+続いて、解析サービスに渡す[パラメーター](https://developers.arcgis.com/javascript/latest/api-reference/esri-tasks-support-ClosestFacilityParameters.html)を作成します。  
+今回は、最寄りの避難場所へのルートを取得したいので、returnRoutes の値を true に設定します。
+
+```js
+require([
+  // モジュールの読み込み
+  "esri/tasks/ClosestFacilityTask",
+  "esri/tasks/support/ClosestFacilityParameters"
+], function(ClosestFacilityTask, ClosestFacilityParameters){
+
+  // 最寄り施設の検出解析の設定
+  var closestFacilityTask = new ClosestFacilityTask({
+    url: "https://route.arcgis.com/arcgis/rest/services/World/ClosestFacility/NAServer/ClosestFacility_World"
+  });
+
+  var params = new ClosestFacilityParameters({
+    returnRoutes: true
+  });
+
+});
+```
+
+次に、クリック地点から最も近い避難場所を検出するため、クリック地点を incidents としてパラメーターに追加します。  
+incidents に渡す値は、[FeatureSet](https://developers.arcgis.com/javascript/latest/api-reference/esri-tasks-support-FeatureSet.html) というフィーチャのコレクションです。  
+マップのクリック地点を表示する際に作成したグラフィックをもとに、FeatureSet を作成し、パラメーターに追加します。
+
+```js
+require([
+  // モジュールの読み込み
+  "esri/tasks/support/FeatureSet"
+], function(FeatureSet){
+
+  function runClosestFacilityTask(evt){
+
+    // クリック地点をマップに表示
+    var point = evt.mapPoint;
+    var location = new Graphic({
+      geometry: evt.mapPoint,
+      symbol: incidentPointSymbol
+    });
+    view.graphics.add(location);
+
+    // クリック地点を解析のパラメーターに設定
+    var features = [];
+    features.push(location);
+    var incidents = new FeatureSet({
+      features: features
+    });
+    params.incidents = incidents;
+
+  }
+
+});
+```
+
+続いて、facilities パラメーターを設定します。  
+facilities には、検索対象の施設を渡します。facilities に設定される値も FeatureSet です。  
+今回は、クリック地点から半径 1km にある避難場所を検索対象として facilities に渡します。
+
+では、クリック地点から半径 1km の避難場所を取得するため、クリック地点から 1km の範囲のバッファーを作成してみましょう。
+
+```js
+require([
+  // モジュールの読み込み
+  "esri/geometry/geometryEngine",
+], function(geometryEngine){
+
+  function runClosestFacilityTask(evt){
+
+    // クリック地点をマップに表示
+    var point = evt.mapPoint;
+    var location = new Graphic({
+      geometry: evt.mapPoint,
+      symbol: incidentPointSymbol
+    });
+    view.graphics.add(location);
+
+    // クリック地点を解析のパラメーターに設定
+    var features = [];
+    features.push(location);
+    var incidents = new FeatureSet({
+      features: features
+    });
+    params.incidents = incidents;
+
+    // クリック地点から 1km のバッファーを作成
+    var buffer = geometryEngine();
+    var area = new Graphic({
+      // バッファーのグラフィック
+    });
+    // バッファーをマップに表示
+    view.graphics.add(area);
+
+  }
+
+});
+```
+
+<span style="color:orange;">タスク</span>  
+クライアント側で計算幾何学計算を行う [geometryEngine](https://developers.arcgis.com/javascript/latest/api-reference/esri-geometry-geometryEngine.html) を使用して、クリック地点から 1km のバッファーを作成し、作成したバッファーをマップに表示してみましょう。
+
+<span style="color:orange;">回答</span>
+
+```js
+// クリック地点から 1km のバッファーを作成
+var buffer = geometryEngine.buffer(point, 1, "kilometers");
+
+// バッファーのグラフィック
+var area = new Graphic({
+  geometry: buffer,
+  symbol: bufferPolygonSymbol
+});
+
+// バッファーをマップに表示
+view.graphics.add(area);
+```
+
+バッファーを作成したら、バッファーに含まれる避難場所をクエリします。  
+避難場所レイヤーに対してクエリを行うため、避難場所レイヤーを取得します。
+
+<span style="color:orange;">タスク</span>  
+Web マップに含まれる避難場所レイヤーを取得して shelterLayer 変数へ代入しましょう。  
+Web マップに含まれるすべてのレイヤーは、Web マップを読み込むため作成した webmap オブジェクトからアクセス可能です。
+
+<span style="color:orange;">例</span>
+
+```js
+// レイヤーの取得
+var shelterLayer;
+webmap.then(function(){
+  shelterLayer = webmap.layers.find(function(layer){
+    return layer.title === "レイヤーの名前";
+  });
+});
+```
+
+避難場所レイヤーを取得したら、クエリパラメーターを作成します。
+バッファー内に含まれる避難場所をクエリするため、geometry パラメーターにバッファーを設定します。  
+クエリを実行すると、結果が FeatureSet として返ってきます。  
+最寄り施設の検出解析の facilities パラメーターに渡す値は FeatureSet なので、戻り値を facilities パラメーターに設定します。
+
+```js
+function runClosestFacilityTask(evt){
+
+  // クリック地点から 1km のバッファーを作成
+  var buffer = geometryEngine.buffer(point, 1, "kilometers");
+  var area = new Graphic({
+    geometry: buffer,
+    symbol: bufferPolygonSymbol
+  });
+  view.graphics.add(area);
+
+  // バッファー内にある避難場所をクエリ
+  var queryParams = shelterLayer.createQuery();
+  queryParams.geometry = buffer;
+  // クエリの実行
+  shelterLayer.queryFeatures(queryParams).then(function(result){
+    // クエリ結果を解析対象として設定
+    params.facilities = result;
+  });
+
+}
+```
+
+これで、最寄り施設の検出解析に必要なパラメーターはすべて設定されました。  
+最寄り施設の検出解析を実行して、解析結果に含まれる最寄り施設へのルートをマップに表示します。
+
+```js
+function runClosestFacilityTask(evt){
+
+  // バッファー内にある避難場所をクエリ
+  var queryParams = shelterLayer.createQuery();
+  queryParams.geometry = buffer;
+  // クエリの実行
+  shelterLayer.queryFeatures(queryParams).then(function(result){
+    // クエリ結果を解析対象として設定
+    params.facilities = result;
+  }).then(function(){
+    // 解析の実行
+    closestFacilityTask.solve(params).then(function(solveResult){
+      // 結果を表示
+      var routes = solveResult.routes.map(function(route){
+        route.symbol = routePolylineSymbol;
+        return route;
+      });
+      view.graphics.addMany(routes);
+    });
+  });
+
+}
+```
+
+最後に、クリック時に、以前の検索結果を削除するため、マップに表示されているすべてのグラフィックを削除するメソッドを追加します。
+
+```js
+function runClosestFacilityTask(evt){
+
+  view.graphics.removeAll();
+
+}
+```
+
+それでは、アプリを起動してみましょう。  
+アプリを開くと、Web マップが読み込まれ、表示されます。  
+そして、マップをクリックするとクリック地点から最寄りの避難場所へのルートが表示されます。
