@@ -25,17 +25,14 @@
       "esri/views/MapView",
       "esri/tasks/ClosestFacilityTask",
       "esri/tasks/support/ClosestFacilityParameters",
-      "esri/symbols/PictureMarkerSymbol",
       "esri/symbols/SimpleMarkerSymbol",
       "esri/symbols/SimpleLineSymbol",
       "esri/symbols/SimpleFillSymbol",
       "esri/Graphic",
       "esri/tasks/support/FeatureSet",
       "esri/geometry/geometryEngine",
-      "dojo/dom-style",
-      "dojo/dom",
-      "dojo/on"
-    ], function(WebMap, MapView, ClosestFacilityTask, ClosestFacilityParameters, PictureMarkerSymbol, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Graphic, FeatureSet, geometryEngine, domStyle, dom, on) {
+      "dojo/domReady!"
+    ], function(WebMap, MapView, ClosestFacilityTask, ClosestFacilityParameters, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Graphic, FeatureSet, geometryEngine) {
       // Web マップの作成
       var webmap = new WebMap({
         portalItem: {
@@ -60,7 +57,7 @@
       // View のクリックイベントハンドラ
       view.on("click", runClosestFacilityTask);
 
-      // 最寄り施設解析の設定
+      // 最寄り施設の検出解析の設定
       var closestFacilityTask = new ClosestFacilityTask({
         url: "https://route.arcgis.com/arcgis/rest/services/World/ClosestFacility/NAServer/ClosestFacility_World"
       });
@@ -70,18 +67,17 @@
       });
 
       // シンボルの作成
-      var incidentPointSymbol = new PictureMarkerSymbol({
-        url: "https://static.arcgis.com/images/Symbols/Basic/RedStickpin.png",
-        height: "30px",
-        width: "30px",
-        yoffset: "15px"
+      var incidentPointSymbol = new SimpleMarkerSymbol({
+        style: "circle",
+        color: [255, 0, 0],
+        size: 8
       });
 
       var bufferPolygonSymbol = new SimpleFillSymbol({
-        color: [232, 104, 80, 0.25],
+        color: [255, 183, 51, 0.25],
         style: "solid",
         outline: {
-          color: [232, 104, 80],
+          color: [255, 183, 51],
           width: 2
         }
       });
@@ -96,13 +92,15 @@
       function runClosestFacilityTask(evt){
         view.graphics.removeAll();
 
-        // クリック地点を解析のパラメーターに設定
+        // クリック地点をマップに表示
+        var point = evt.mapPoint;
         var location = new Graphic({
           geometry: evt.mapPoint,
           symbol: incidentPointSymbol
         });
         view.graphics.add(location);
 
+        // クリック地点を解析のパラメーターに設定
         var features = [];
         features.push(location);
         var incidents = new FeatureSet({
