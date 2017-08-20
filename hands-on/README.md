@@ -49,15 +49,17 @@ Web マップに避難場所データがレイヤーとして追加されまし�
 
 ![スタイルの変更（収容人数）](./img/1-4.png)
 
-スマートマッピングでは、色と大きさを使用して、複数のスタイルを設定することもできます。  
-「収容人数」に加えて、「屋内屋外」も表現してみましょう。  
+スマートマッピングでは、色と大きさを使用して、複数のスタイルを設定することもできます。
 
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) タスク  
+「収容人数」に加えて、「屋内屋外」も表現してみましょう。  
 シンボルの大きさで「収容人数」を、色で「屋内屋外」を表現するようスタイルを設定したら、[完了] をクリックし、設定を終了します。
 
 ![スタイルの変更](./img/1-5.png)
 
 マップビューアーには、データを追加したりスタイルを変更するほかに、ポップアップの構成やフィルタリングなどの様々な機能が提供されており、簡単に Web マップを構成することができます。
 
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) タスク  
 以下の項目を設定してみましょう。
 
 * レイヤー
@@ -90,10 +92,9 @@ Web マップ ID は、アプリから Web マップを参照する際に使用�
 
 ![Web マップ ID](./img/1-7.png)
 
-## 2. Web アプリの作成
+## 2. アプリの作成
 
-GitHub に公開している[ハンズオンのリポジトリ]()からハンズオン資料をダウンロードします。  
-hands-on/index.html をテキストエディターで開きます。  
+GitHub に公開している[ハンズオン資料](https://github.com/ej-asuzuki/workshop/)を開き、[hands-on/index.html](https://github.com/ej-asuzuki/workshop/blob/master/hands-on/index.html) をテキストエディターにコピーします。
 
 ### 1. ArcGIS API for JavaScript の読み込み
 
@@ -131,18 +132,10 @@ script タグを追加し、Web マップの読み込み、表示に必要なモ
 
 ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) タスク
 
-[Web マップクラスのドキュメント](https://developers.arcgis.com/javascript/latest/api-reference/esri-WebMap.html)を参考に、作成した Web マップを読み込んでみましょう。  
+[Web マップクラスのドキュメント](https://developers.arcgis.com/javascript/latest/api-reference/esri-WebMap.html)を参考に、作成した Web マップを読み込んでみましょう。  
 Web マップを読み込んだら、アプリを開いて、作成した Web マップがアプリで表示されているか確認します。
 
-![#c5f015](https://placehold.it/15/c5f015/000000?text=+) 回答
-
-```js
-var webmap = new WebMap({
-  portalItem: {
-    id: "Web マップ ID"
-  }
-});
-```
+※ 回答例は [example/README.md](https://github.com/ej-asuzuki/workshop/tree/master/hands-on/example) に記載しています。
 
 ### 3. 最寄りの避難場所を検索
 
@@ -208,53 +201,17 @@ require([
   * 最寄りの避難場所へのルート（ライン）を表すシンボル
   * routePolylineSymbol 変数に代入
 
-![#c5f015](https://placehold.it/15/c5f015/000000?text=+) 例
-
-```js
-require([
-  // モジュールの読み込み
-  "esri/symbols/SimpleMarkerSymbol",
-  "esri/symbols/SimpleFillSymbol",
-  "esri/symbols/SimpleLineSymbol"
-], function(SimpleMarkerSymbol, SimpleFillSymbol, SimpleLineSymbol){
-
-  // クリック地点のシンボル
-  var incidentPointSymbol = new SimpleMarkerSymbol({
-    style: "circle",
-    color: [255, 0, 0],
-    size: 8
-  });
-
-  // バッファーシンボル
-  var bufferPolygonSymbol = new SimpleFillSymbol({
-    color: [255, 183, 51, 0.25],
-    style: "solid",
-    outline: {
-      color: [255, 183, 51],
-      width: 2
-    }
-  });
-
-  // ルートシンボル
-  var routePolylineSymbol = new SimpleLineSymbol({
-    color: [89, 95, 35],
-    width: 4,
-    style: "solid"
-  });
-
-});
-```
-
 #### 最寄り施設の検出解析の設定
 
 最寄りの避難場所を検索します。  
 避難場所の検索には、[最寄り施設の検出解析](https://desktop.arcgis.com/ja/arcmap/latest/extensions/network-analyst/closest-facility.htm)を使用します。最寄り施設の検出解析は、入力した地点（incidents）に最も近い施設（facilities）を検索して、地点までの最適なルートを出力します。    
 API には、最寄り施設の検出解析タスク（[ClosestFacilityTask](https://developers.arcgis.com/javascript/latest/api-reference/esri-tasks-ClosestFacilityTask.html)） が用意されており、簡単に解析を行えます。
 
-まず、ClosestFacilityTask に解析で使用するサービスを設定します。　
-今回は、[ArcGIS Online が公開しているサービス](https://developers.arcgis.com/features/directions/)を使用します。  　
-ArcGIS Online には、最寄り施設の検出解析のほかにも、[さまざまな解析サービス](http://www.arcgis.com/features/features-analytics.html)がホストされており、独自のサービスを公開することなく、簡単に解析機能を利用できます。  
-使用する解析サービスを設定したら、解析サービスに渡す[パラメーター](https://developers.arcgis.com/javascript/latest/api-reference/esri-tasks-support-ClosestFacilityParameters.html)を作成します。  
+まず、ClosestFacilityTask に解析で使用するサービスを設定します。  
+今回は、[ArcGIS Online が公開しているサービス](https://developers.arcgis.com/features/directions/)を使用します。  
+ArcGIS Online には、最寄り施設の検出解析のほかにも、[さまざまな解析サービス](http://www.arcgis.com/features/features-analytics.html)がホストされており、独自のサービスを公開することなく、簡単に解析機能を利用できます。
+
+使用する解析サービスを設定したら、解析サービスに渡す[パラメーター](https://developers.arcgis.com/javascript/latest/api-reference/esri-tasks-support-ClosestFacilityParameters.html)を作成します。  
 最寄りの避難場所へのルートを取得したいので、returnRoutes の値を true に設定します。
 
 ```js
@@ -315,7 +272,8 @@ require([
 
 続いて、facilities パラメーターを設定します。  
 facilities には、検索対象の施設を渡します。facilities に設定される値も FeatureSet です。  
-今回は、クリック地点から半径 1km にある避難場所を検索対象として facilities に渡します。
+今回は、クリック地点から半径 1km にある避難場所を検索対象として facilities に渡します。  
+※ ArcGIS Online が提供する最寄り施設の検出解析サービスでは、facilities の最大数が 100 に制限されています。
 
 クリック地点から半径 1km の避難場所を取得するため、まず、クリック地点から 1km の範囲のバッファーを作成します。
 
@@ -360,22 +318,6 @@ require([
 
 クライアント側で計算幾何学計算を行う [geometryEngine](https://developers.arcgis.com/javascript/latest/api-reference/esri-geometry-geometryEngine.html) を使用して、クリック地点から 1km のバッファーを作成し、作成したバッファーをマップに表示してみましょう。
 
-![#c5f015](https://placehold.it/15/c5f015/000000?text=+) 回答
-
-```js
-// クリック地点から 1km のバッファーを作成
-var buffer = geometryEngine.buffer(point, 1, "kilometers");
-
-// バッファーのグラフィック
-var area = new Graphic({
-  geometry: buffer,
-  symbol: bufferPolygonSymbol
-});
-
-// バッファーをマップに表示
-view.graphics.add(area);
-```
-
 バッファーを作成したら、バッファーに含まれる避難場所をクエリします。  
 避難場所レイヤーに対してクエリを行うため、避難場所レイヤーを取得します。
 
@@ -383,18 +325,6 @@ view.graphics.add(area);
 
 Web マップに含まれる避難場所レイヤーを取得して shelterLayer 変数へ代入しましょう。  
 Web マップに含まれるすべてのレイヤーは、Web マップを読み込むため作成した webmap オブジェクトからアクセス可能です。
-
-![#c5f015](https://placehold.it/15/c5f015/000000?text=+) 例
-
-```js
-// レイヤーの取得
-var shelterLayer;
-webmap.then(function(){
-  shelterLayer = webmap.layers.find(function(layer){
-    return layer.title === "レイヤーの名前";
-  });
-});
-```
 
 避難場所レイヤーを取得したら、クエリ パラメーターを作成します。
 バッファー内に含まれる避難場所をクエリするため、geometry にバッファーを設定します。  
@@ -464,4 +394,4 @@ function runClosestFacilityTask(evt){
 
 それでは、アプリを起動してみましょう。  
 アプリを開くと、Web マップが読み込まれ、表示されます。  
-そして、マップをクリックするとクリック地点から最寄りの避難場所へのルートが表示されます。
+マップをクリックするとクリック地点から最寄りの避難場所へのルートが表示されます。
