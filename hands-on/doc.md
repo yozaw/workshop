@@ -180,20 +180,10 @@ require([
 });
 ```
 
-![#c5f015](https://placehold.it/15/c5f015/000000?text=+) タスク
+geometry は、クリックイベントの戻り値に含まれる mapPoint を参照しています。  
+では、クリック地点を表すシンボルを作成し、symbol が参照する incidentPointSymbol に代入してみましょう。
 
-作成したグラフィックは symbol プロパティで incidentPointSymbol を参照しています。  
-クリック地点を表すシンボルを作成し、incidentPointSymbol に代入しましょう。
-
-ヒント：API には、ジオメトリのタイプごとに以下のシンボル クラスを提供しています。
-* ポイント
-  * [マーカーシンボル](https://developers.arcgis.com/javascript/latest/api-reference/esri-symbols-SimpleMarkerSymbol.html)
-* ライン
-  * [ライン シンボル](https://developers.arcgis.com/javascript/latest/api-reference/esri-symbols-SimpleLineSymbol.html)
-* ポリゴン
-  * [塗りつぶしシンボル](https://developers.arcgis.com/javascript/latest/api-reference/esri-symbols-SimpleFillSymbol.html)
-
-クリック地点を表すシンボルを作成したら、次の2つのシンボルを作成します。
+クリック地点を表すシンボルを作成したら、さらに、次の2つのシンボルを作成します。
 * バッファーシンボル
   * クリック地点から 1km のバッファー（ポリゴン）を表すシンボル
   * bufferPolygonSymbol 変数に代入
@@ -201,7 +191,40 @@ require([
   * 最寄りの避難場所へのルート（ライン）を表すシンボル
   * routePolylineSymbol 変数に代入
 
-![#c5f015](https://placehold.it/15/c5f015/000000?text=+) [回答例](https://github.com/ej-asuzuki/workshop/blob/master/hands-on/examples/task2.md)
+```js
+require([
+  // モジュールの読み込み
+  "esri/symbols/SimpleMarkerSymbol",
+  "esri/symbols/SimpleFillSymbol",
+  "esri/symbols/SimpleLineSymbol"
+], function(SimpleMarkerSymbol, SimpleFillSymbol, SimpleLineSymbol){
+
+  // クリック地点のシンボル
+  var incidentPointSymbol = new SimpleMarkerSymbol({
+    style: "circle",
+    color: [255, 0, 0],
+    size: 8
+  });
+
+  // バッファーシンボル
+  var bufferPolygonSymbol = new SimpleFillSymbol({
+    color: [255, 183, 51, 0.25],
+    style: "solid",
+    outline: {
+      color: [255, 183, 51],
+      width: 2
+    }
+  });
+
+  // ルートシンボル
+  var routePolylineSymbol = new SimpleLineSymbol({
+    color: [89, 95, 35],
+    width: 4,
+    style: "solid"
+  });
+
+});
+```
 
 #### 最寄り施設の検出解析の設定
 
