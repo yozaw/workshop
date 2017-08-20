@@ -1,9 +1,9 @@
-# Web マップを活用したアプリ開発
+# Web マップを活用したアプリ開発手順書
 
 ## 概要
 
-この手順書では、避難場所を可視化した Web マップを ArcGIS API for JavaScript を使用したアプリで読み込みます。  
-さらに、ArcGIS Online が公開している最寄り施設の検出解析サービスを利用して、マップをクリックした地点から最寄りの避難場所へのルートを表示します。
+この手順書では、避難場所を可視化した Web マップの作成、および作成した Web マップを ArcGIS API for JavaScript を使用したアプリで読み込む手順を説明します。  
+さらに、ArcGIS Online が公開している最寄り施設の検出解析サービスを利用して、マップをクリックした地点から最寄りの避難場所へのルートを表示する機能をアプリに実装します。
 
 ## 1. Web マップの作成
 
@@ -94,7 +94,7 @@ Web マップ ID は、アプリから Web マップを参照する際に使用�
 
 ## 2. アプリの作成
 
-GitHub に公開している[ハンズオン資料](https://github.com/ej-asuzuki/workshop/)を開き、[hands-on/index.html](https://github.com/ej-asuzuki/workshop/blob/master/hands-on/index.html) をテキストエディターにコピーします。
+[hands-on/index.html](index.html) を開き、テキストエディターにコピーします。
 
 ### 1. ArcGIS API for JavaScript の読み込み
 
@@ -185,11 +185,9 @@ geometry は、クリックイベントの戻り値に含まれる mapPoint を�
 
 クリック地点を表すシンボルを作成したら、さらに、次の2つのシンボルを作成します。
 * バッファーシンボル
-  * クリック地点から 1km のバッファー（ポリゴン）を表すシンボル
-  * bufferPolygonSymbol 変数に代入
+  * クリック地点から 1km のバッファーを表すシンボル
 * ルートシンボル
-  * 最寄りの避難場所へのルート（ライン）を表すシンボル
-  * routePolylineSymbol 変数に代入
+  * 最寄りの避難場所へのルートを表すシンボル
 
 ```js
 require([
@@ -251,7 +249,8 @@ require([
     url: "https://route.arcgis.com/arcgis/rest/services/World/ClosestFacility/NAServer/ClosestFacility_World"
   });
 
-  var params = new ClosestFacilityParameters({
+  // パラメータの設定
+  var params = new ClosestFacilityParameters({
     returnRoutes: true
   });
 
@@ -343,10 +342,10 @@ require([
 
 クライアント側で計算幾何学計算を行う [geometryEngine](https://developers.arcgis.com/javascript/latest/api-reference/esri-geometry-geometryEngine.html) を使用して、クリック地点から 1km のバッファーを作成し、作成したバッファーをマップに表示してみましょう。
 
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) [回答例](https://github.com/ej-asuzuki/workshop/blob/master/hands-on/examples/task3.md)
+
 バッファーを作成したら、バッファーに含まれる避難場所をクエリします。  
 避難場所レイヤーに対してクエリを行うため、避難場所レイヤーを取得します。
-
-![#c5f015](https://placehold.it/15/c5f015/000000?text=+) [回答例](https://github.com/ej-asuzuki/workshop/blob/master/hands-on/examples/task3.md)
 
 ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) タスク
 
