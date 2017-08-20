@@ -135,7 +135,7 @@ script タグを追加し、Web マップの読み込み、表示に必要なモ
 [Web マップクラスのドキュメント](https://developers.arcgis.com/javascript/latest/api-reference/esri-WebMap.html)を参考に、作成した Web マップを読み込んでみましょう。  
 Web マップを読み込んだら、アプリを開いて、作成した Web マップがアプリで表示されているか確認します。
 
-※ 回答例は [example/README.md](https://github.com/ej-asuzuki/workshop/tree/master/hands-on/example) に記載しています。
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) [回答例](https://github.com/ej-asuzuki/workshop/tree/master/hands-on/example/task1)
 
 ### 3. 最寄りの避難場所を検索
 
@@ -200,6 +200,8 @@ require([
 * ルートシンボル
   * 最寄りの避難場所へのルート（ライン）を表すシンボル
   * routePolylineSymbol 変数に代入
+
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) [回答例](https://github.com/ej-asuzuki/workshop/tree/master/hands-on/example/task2)
 
 #### 最寄り施設の検出解析の設定
 
@@ -321,10 +323,14 @@ require([
 バッファーを作成したら、バッファーに含まれる避難場所をクエリします。  
 避難場所レイヤーに対してクエリを行うため、避難場所レイヤーを取得します。
 
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) [回答例](https://github.com/ej-asuzuki/workshop/tree/master/hands-on/example/task3)
+
 ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) タスク
 
 Web マップに含まれる避難場所レイヤーを取得して shelterLayer 変数へ代入しましょう。  
 Web マップに含まれるすべてのレイヤーは、Web マップを読み込むため作成した webmap オブジェクトからアクセス可能です。
+
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) [回答例](https://github.com/ej-asuzuki/workshop/tree/master/hands-on/example/task4)
 
 避難場所レイヤーを取得したら、クエリ パラメーターを作成します。
 バッファー内に含まれる避難場所をクエリするため、geometry にバッファーを設定します。  
