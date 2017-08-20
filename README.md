@@ -9,11 +9,15 @@
 * [ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/)
 * [ArcGIS for Developers](https://developers.arcgis.com/en/)
 
-ArcGIS の開発キットを使用して開発を行う場合は ArcGIS for Developers アカウント（[ArcGIS for Developers](https://developers.arcgis.com/en/)）が必要です。アカウント作成は[こちら](https://esrijapan.github.io/arcgis-dev-resources/get-dev-account/)
+各サンプルが使用している製品は、サンプルの README ファイルを参照ください。
+
+ArcGIS の開発キットを使用して開発を行う場合は ArcGIS for Developers へのサインアップ（[ArcGIS for Developers](https://developers.arcgis.com/en/)）が必要です。
 
 ## 動作環境
 
 [製品ページ](https://www.esrij.com/products/arcgis-api-for-javascript/environments/)をご参照ください。
+
+各サンプルの動作環境は、サンプルの README ファイルを参照ください。
 
 ## リソース
 
