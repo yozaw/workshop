@@ -24,7 +24,9 @@ class ViewController: UIViewController, AGSGeoViewTouchDelegate {
         super.viewDidLoad()
         
         // Web マップの URL を指定してマップを作成
-        self.mapView.map = AGSMap(url: URL(string: "https://www.arcgis.com/home/item.html?id=285f619f75e64d3681ba101b006d2f65")!)
+        // https://www.arcgis.com/home/item.html?id=<作成した Web マップの ID>
+        // 例: https://www.arcgis.com/home/item.html?id=285f619f75e64d3681ba101b006d2f65
+        self.mapView.map = AGSMap(url: URL(string: "<Web マップの URL>")!)
         
         // マップの操作を無効にする
         self.mapView.isUserInteractionEnabled = true
